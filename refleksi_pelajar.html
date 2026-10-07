@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Refleksi Pelajar Kluster 2</title>
+  <!-- Tailwind CSS & Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+  <!-- Navigasi Utama -->
+  <nav class="bg-blue-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-file-signature text-2xl text-yellow-400"></i>
+        <span class="font-bold text-lg hidden sm:inline">Sistem Refleksi Kluster 2</span>
+        <span class="font-bold text-sm sm:hidden">Refleksi K2</span>
+      </div>
+      <div class="space-x-2 flex items-center">
+        <button onclick="switchTab('pelajar')" id="tabPelajarBtn" class="bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition">
+          <i class="fa-solid fa-pen-to-square"></i> Borang Pelajar
+        </button>
+        <button onclick="switchTab('admin')" id="tabAdminBtn" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition">
+          <i class="fa-solid fa-user-shield"></i> Mod Pentadbir
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-5xl mx-auto p-4 md:p-6">
+
+    <!-- Banner Amaran Jika Maklum Balas Ditutup -->
+    <div id="closedNoticeBanner" class="hidden mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow text-sm font-bold flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+        <span>PENTING: Maklum balas telah ditutup oleh pentadbir. Borang tidak boleh dihantar pada masa ini.</span>
+      </div>
+    </div>
+
+    <!-- ================= TAB BORANG PELAJAR ================= -->
+    <div id="sectionPelajar" class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+      
+      <!-- Header Borang -->
+      <div class="text-center border-b pb-4 mb-6">
+        <h1 class="text-lg md:text-xl font-bold text-blue-900 uppercase">Kementerian Pendidikan Tinggi</h1>
+        <h2 class="text-sm md:text-md font-semibold text-gray-700">Jabatan Pendidikan Politeknik dan Kolej Komuniti</h2>
+        <div class="mt-3 bg-blue-50 text-blue-900 py-2 px-4 rounded-lg inline-block font-bold text-xs md:text-sm">
+          REFLEKSI PELAJAR KLUSTER 2: PENJURIAN DAN PERTANDINGAN
+        </div>
+        <p class="text-xs text-gray-500 mt-1">(Dilengkapkan oleh pelajar dalam tempoh SATU minggu selepas tamat aktiviti)</p>
+      </div>
+
+      <form id="refleksiForm" onsubmit="handleFormSubmit(event)" class="space-y-6">
+        <!-- Maklumat Pelajar -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">1. NAMA PELAJAR *</label>
+            <input type="text" id="namaPelajar" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Nama Penuh Pelajar">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">2. NO. PENDAFTARAN *</label>
+            <input type="text" id="noPendaftaran" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Contoh: 01DIT21F1001">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">3. NAMA IEEP *</label>
+            <input type="text" id="namaIEEP" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Nama Pertandingan / Program">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">4. TARIKH IEEP *</label>
+            <input type="date" id="tarikhIEEP" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+
+        <!-- Panduan Skala -->
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 text-xs text-yellow-800 rounded">
+          <b>Skala Penilaian:</b> 4 = Sangat Baik | 3 = Baik | 2 = Sederhana | 1 = Lemah
+        </div>
+
+        <!-- Bahagian Soalan (A1 - D3) -->
+        <div id="questionsContainer" class="space-y-6"></div>
+
+        <!-- Soalan Subjektif (T6 & T7) -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">6. Dapatan/komen daripada panel/juri terhadap hasil kerja (T6):</label>
+            <textarea id="T6" rows="3" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Masukkan dapatan/komen juri..."></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 mb-1">7. Secara keseluruhannya saya berpandangan (T7):</label>
+            <textarea id="T7" rows="3" class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Pandangan keseluruhan anda..."></textarea>
+          </div>
+        </div>
+
+        <!-- Butang Hantar -->
+        <div class="text-right">
+          <button type="submit" id="btnSubmit" class="bg-blue-800 hover:bg-blue-900 text-white font-bold px-6 py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2 float-right">
+            <span>Hantar Maklum Balas</span>
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ================= TAB ADMIN DASHBOARD ================= -->
+    <div id="sectionAdmin" class="hidden space-y-6">
+      
+      <!-- Panel Kawalan Admin -->
+      <div class="bg-white rounded-xl shadow p-6 flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Portal Pentadbir (Admin Dashboard)</h2>
+          <p class="text-xs text-gray-500">Analisis dinamik, pengurusan rekod individu & muat turun PDF</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span class="text-xs font-bold text-gray-600">Status Maklum Balas:</span>
+          <button id="toggleStatusBtn" onclick="toggleStatus()" class="px-4 py-2 rounded-lg font-bold text-xs text-white shadow transition">
+            Memuatkan...
+          </button>
+          <button onclick="logoutAdmin()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow">
+            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+          </button>
+        </div>
+      </div>
+
+      <!-- Analisis Carta Bar Dinamik -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+          <h3 class="font-bold text-gray-700"><i class="fa-solid fa-chart-column text-blue-600"></i> Analisis Taburan Carta Bar Soalan</h3>
+          <div class="flex items-center space-x-2">
+            <label class="text-xs font-bold text-gray-600">Pilih Soalan Filter:</label>
+            <select id="questionFilter" onchange="updateChart()" class="border rounded-lg p-1.5 text-xs font-bold bg-gray-50 focus:ring-2 focus:ring-blue-500">
+              <!-- Opsyen A1-D3 -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Petunjuk Soalan Dinamik -->
+        <div id="questionLegend" class="bg-blue-50 border border-blue-200 text-blue-900 p-3 rounded-lg text-xs font-medium mb-4">
+          Petunjuk soalan akan muncul di sini...
+        </div>
+
+        <!-- Carta Bar -->
+        <div class="relative h-64 w-full">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Navigasi Rekod Individu (Google Form Style) -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex justify-between items-center border-b pb-3 mb-4">
+          <h3 class="font-bold text-gray-700"><i class="fa-solid fa-address-card text-green-600"></i> Paparan Rekod Individu</h3>
+          <div class="flex items-center space-x-2">
+            <button onclick="prevRecord()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1.5 rounded text-xs font-bold transition"><i class="fa-solid fa-chevron-left"></i> Sebelum</button>
+            <span id="recordIndicator" class="text-xs font-bold text-gray-600">0 / 0</span>
+            <button onclick="nextRecord()" class="bg-gray-200 hover:bg-gray-300 px-3 py-1.5 rounded text-xs font-bold transition">Selepas <i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Kad Rekod Individu -->
+        <div id="individualRecordCard" class="text-sm space-y-3">
+          <p class="text-gray-500 italic text-center">Tiada rekod disimpan lagi.</p>
+        </div>
+      </div>
+
+      <!-- Muat Turun Pukal PDF -->
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="font-bold text-gray-700 mb-3"><i class="fa-solid fa-folder-open text-amber-600"></i> Senarai Rekod & Muat Turun PDF Pukal</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-gray-100 border-b">
+                <th class="p-2 border">Bil</th>
+                <th class="p-2 border">Nama Pelajar</th>
+                <th class="p-2 border">No. Pendaftaran</th>
+                <th class="p-2 border">Nama IEEP</th>
+                <th class="p-2 border">Tarikh</th>
+                <th class="p-2 border text-center">Tindakan PDF</th>
+              </tr>
+            </thead>
+            <tbody id="bulkTableBody">
+              <!-- Senarai Pukal -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Pop-up Log Masuk Admin -->
+  <div id="adminAuthModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
+      <div class="text-4xl text-blue-900"><i class="fa-solid fa-user-lock"></i></div>
+      <h3 class="font-bold text-lg text-gray-800">Akses Pentadbir</h3>
+      <p class="text-xs text-gray-500">Sila masukkan kata laluan untuk mengakses modul pentadbir.</p>
+      
+      <form onsubmit="handleAdminLogin(event)" class="space-y-3">
+        <input type="password" id="adminPasswordInput" required class="w-full border rounded-lg p-2 text-sm text-center focus:ring-2 focus:ring-blue-500" placeholder="Kata Laluan Admin">
+        <p id="adminAuthError" class="text-xs text-red-600 font-bold hidden">Kata laluan tidak sah!</p>
+        
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeAdminAuthModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1.5 rounded-lg text-xs font-bold">Batal</button>
+          <button type="submit" id="adminLoginBtn" class="bg-blue-800 hover:bg-blue-900 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Log Masuk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Pop-up Umum -->
+  <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
+      <div id="modalIcon" class="text-4xl"></div>
+      <h3 id="modalTitle" class="font-bold text-lg text-gray-800"></h3>
+      <p id="modalBody" class="text-sm text-gray-600"></p>
+      <div id="modalFooter" class="pt-2"></div>
+    </div>
+  </div>
+
+  <script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsq-U4327rxS5cxG5jGWvcjPuiLcj0b1lQ-7DRBpN2vrDHmGelTnkUCyMN2WDIJqIpjQ/exec";
+    const questionsMeta = {
+      'A1': { section: 'BAHAGIAN A: AKADEMIK', text: 'Mengaplikasikan pembelajaran teori dan amali yang pelbagai.' },
+      'A2': { section: 'BAHAGIAN A: AKADEMIK', text: 'Meningkatkan pengetahuan dan kefahaman berkaitan hasil kerja*.' },
+      'A3': { section: 'BAHAGIAN A: AKADEMIK', text: 'Membuat perkaitan dengan bidang pengajian yang diikuti.' },
+      'B1': { section: 'BAHAGIAN B: EKSPLORASI', text: 'Meningkatkan tahap keyakinan dalam menyuarakan idea dan pendapat semasa sesi pembentangan/persembahan.' },
+      'B2': { section: 'BAHAGIAN B: EKSPLORASI', text: 'Mencari ruang dan peluang untuk penambahbaikan hasil kerja* daripada maklum balas pihak panel/juri.' },
+      'B3': { section: 'BAHAGIAN B: EKSPLORASI', text: 'Meningkatkan keinginan untuk meneroka bidang yang dipelajari.' },
+      'C1': { section: 'BAHAGIAN C: PERSONALITI', text: 'Mempamerkan personaliti positif kepada pihak panel/juri.' },
+      'C2': { section: 'BAHAGIAN C: PERSONALITI', text: 'Menampilkan gaya bahasa badan/pertuturan yang baik kepada panel/juri.' },
+      'C3': { section: 'BAHAGIAN C: PERSONALITI', text: 'Meningkatkan kemahiran mengorganisasi sesi pembentangan/persembahan.' },
+      'D1': { section: 'BAHAGIAN D: KETERKAITAN/CONNECTIVITY', text: 'Mempamerkan kemahiran komunikasi yang efektif** (berkesan) semasa sesi pembentangan/persembahan.' },
+      'D2': { section: 'BAHAGIAN D: KETERKAITAN/CONNECTIVITY', text: 'Memahami kepentingan jalinan hubungan dengan pihak industri.' },
+      'D3': { section: 'BAHAGIAN D: KETERKAITAN/CONNECTIVITY', text: 'Pendedahan terhadap teknologi/amalan terkini yang digunakan daripada pihak industri.' }
+    };
+
+    let adminData = { records: [], questionsSummary: {}, formOpen: true };
+    let currentRecordIdx = 0;
+    let chartInstance = null;
+    let authenticatedPassword = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      buildFormQuestions();
+      checkInitialFormStatus();
+    });
+
+    // 1. Semak Status Borang Awal
+	function checkInitialFormStatus() {
+	fetch(`${SCRIPT_URL}?action=getStatus`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.formOpen) {
+        disableFormAndShowBanner();
+      }
+    })
+    .catch(err => console.error("Ralat semakan status:", err));
+}
+
+    function disableFormAndShowBanner() {
+      document.getElementById('closedNoticeBanner').classList.remove('hidden');
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.className = 'bg-gray-400 text-white font-bold px-6 py-2.5 rounded-lg cursor-not-allowed float-right';
+      btn.innerHTML = `<span>Maklum Balas Ditutup</span> <i class="fa-solid fa-lock"></i>`;
+    }
+
+    function enableFormAndHideBanner() {
+      document.getElementById('closedNoticeBanner').classList.add('hidden');
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = false;
+      btn.className = 'bg-blue-800 hover:bg-blue-900 text-white font-bold px-6 py-2.5 rounded-lg shadow-md transition flex items-center justify-center space-x-2 float-right';
+      btn.innerHTML = `<span>Hantar Maklum Balas</span> <i class="fa-solid fa-paper-plane"></i>`;
+    }
+
+    function buildFormQuestions() {
+      const container = document.getElementById('questionsContainer');
+      let currentSec = '';
+      let html = '';
+
+      Object.keys(questionsMeta).forEach(code => {
+        const q = questionsMeta[code];
+        if (q.section !== currentSec) {
+          currentSec = q.section;
+          html += `<div class="bg-blue-900 text-white font-bold px-3 py-1.5 rounded-md text-xs mt-4">${currentSec}</div>`;
+        }
+
+        html += `
+        <div class="border-b pb-3 pt-2 flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <div class="text-xs font-semibold text-gray-800 md:w-2/3">
+            <span class="font-bold text-blue-800">${code}.</span> ${q.text}
+          </div>
+          <div class="flex space-x-4 md:w-1/3 justify-end">
+            ${[4, 3, 2, 1].map(val => `
+              <label class="flex items-center space-x-1 cursor-pointer text-xs font-bold hover:text-blue-600">
+                <input type="radio" name="${code}" value="${val}" required class="text-blue-600 focus:ring-blue-500">
+                <span>${val}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Penukaran Tab Antara Pelajar & Admin (Bersepadu Kata Laluan)
+    function switchTab(tab) {
+      if (tab === 'pelajar') {
+        document.getElementById('sectionPelajar').classList.remove('hidden');
+        document.getElementById('sectionAdmin').classList.add('hidden');
+        document.getElementById('tabPelajarBtn').className = 'bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition';
+        document.getElementById('tabAdminBtn').className = 'bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition';
+      } else {
+        if (authenticatedPassword) {
+          openAdminSection();
+        } else {
+          document.getElementById('adminAuthError').classList.add('hidden');
+          document.getElementById('adminPasswordInput').value = '';
+          document.getElementById('adminAuthModal').classList.remove('hidden');
+        }
+      }
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById('adminAuthModal').classList.add('hidden');
+    }
+
+    // 2. Log Masuk Admin
+function handleAdminLogin(e) {
+  e.preventDefault();
+  const pwdInput = document.getElementById('adminPasswordInput').value;
+  const btn = document.getElementById('adminLoginBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Semak...`;
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'verifyPassword', password: pwdInput })
+  })
+  .then(res => res.json())
+  .then(data => {
+    btn.disabled = false;
+    btn.innerHTML = `Log Masuk`;
+    if (data.valid) {
+      authenticatedPassword = pwdInput;
+      closeAdminAuthModal();
+      openAdminSection();
+    } else {
+      document.getElementById('adminAuthError').classList.remove('hidden');
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.innerHTML = `Log Masuk`;
+    alert('Ralat ketersambungan: ' + err.message);
+  });
+}
+
+    function openAdminSection() {
+      document.getElementById('sectionPelajar').classList.add('hidden');
+      document.getElementById('sectionAdmin').classList.remove('hidden');
+      document.getElementById('tabAdminBtn').className = 'bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition';
+      document.getElementById('tabPelajarBtn').className = 'bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition';
+      fetchAdminData();
+    }
+
+    function logoutAdmin() {
+      authenticatedPassword = null;
+      switchTab('pelajar');
+    }
+
+    // 3. Hantar Borang Refleksi Pelajar
+function handleFormSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Menghantar & Menjana PDF...</span>`;
+
+  const formData = {
+    namaPelajar: document.getElementById('namaPelajar').value,
+    noPendaftaran: document.getElementById('noPendaftaran').value,
+    namaIEEP: document.getElementById('namaIEEP').value,
+    tarikhIEEP: document.getElementById('tarikhIEEP').value,
+    T6: document.getElementById('T6').value,
+    T7: document.getElementById('T7').value
+  };
+
+  Object.keys(questionsMeta).forEach(code => {
+    const selected = document.querySelector(`input[name="${code}"]:checked`);
+    formData[code] = selected ? selected.value : '';
+  });
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'submitRefleksi', data: formData })
+  })
+  .then(res => res.json())
+  .then(res => {
+    btn.disabled = false;
+    btn.innerHTML = `<span>Hantar Maklum Balas</span> <i class="fa-solid fa-paper-plane"></i>`;
+
+    if (res.isClosed) {
+      disableFormAndShowBanner();
+      showModal('text-red-500', '<i class="fa-solid fa-lock"></i>', 'Maklum Balas Ditutup', res.message, `<button onclick="closeModal()" class="bg-gray-800 text-white px-4 py-1.5 rounded-lg text-xs">Tutup</button>`);
+    } else if (res.success) {
+      showModal('text-green-500', '<i class="fa-solid fa-circle-check"></i>', 'Penyerahan Berjaya!', 
+        'Data refleksi anda telah berjaya disimpan ke tab <b>REFLEKSI</b>. Anda boleh memuat turun dokumen PDF refleksi di bawah.',
+        `<a href="${res.pdfUrl}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold inline-block shadow"><i class="fa-solid fa-file-pdf"></i> Muat Turun Dokumen PDF</a>
+         <br><button onclick="closeModal(); document.getElementById('refleksiForm').reset();" class="mt-3 text-xs text-gray-500 underline">Tutup</button>`
+      );
+    } else {
+      alert('Ralat: ' + res.message);
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.innerHTML = `<span>Hantar Maklum Balas</span> <i class="fa-solid fa-paper-plane"></i>`;
+    alert('Ralat berlaku semasa hantaran: ' + err.message);
+  });
+}
+    // 4. Dapatkan Data Admin Dashboard
+function fetchAdminData() {
+  if (!authenticatedPassword) return;
+
+  fetch(`${SCRIPT_URL}?action=getAdminData&password=${encodeURIComponent(authenticatedPassword)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.error) {
+        alert(data.error);
+        logoutAdmin();
+        return;
+      }
+      adminData = data;
+      updateStatusBtn(data.formOpen);
+      populateFilterOptions();
+      initOrUpdateChart();
+      renderIndividualRecord();
+      renderBulkTable();
+    })
+    .catch(err => alert("Ralat mengambil data admin: " + err.message));
+}
+
+    function updateStatusBtn(isOpen) {
+      const btn = document.getElementById('toggleStatusBtn');
+      if (isOpen) {
+        btn.className = 'bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow';
+        btn.innerHTML = `<i class="fa-solid fa-door-open me-1"></i> Maklum Balas DIBUKA`;
+      } else {
+        btn.className = 'bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow';
+        btn.innerHTML = `<i class="fa-solid fa-lock me-1"></i> Maklum Balas DITUTUP`;
+      }
+    }
+
+    // 5. Buka / Tutup Maklum Balas Admin
+function toggleStatus() {
+  const newStatus = !adminData.formOpen;
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'toggleStatus', status: newStatus })
+  })
+  .then(res => res.json())
+  .then(res => {
+    adminData.formOpen = res.formOpen;
+    updateStatusBtn(res.formOpen);
+    if (res.formOpen) enableFormAndHideBanner(); else disableFormAndShowBanner();
+  })
+  .catch(err => alert("Ralat menukar status: " + err.message));
+}
+
+    function populateFilterOptions() {
+      const select = document.getElementById('questionFilter');
+      if (select.children.length === 0) {
+        select.innerHTML = Object.keys(questionsMeta).map(q => `<option value="${q}">${q} - ${questionsMeta[q].section.replace('BAHAGIAN ','')}</option>`).join('');
+      }
+    }
+
+    function initOrUpdateChart() {
+      const qCode = document.getElementById('questionFilter').value || 'A1';
+      const qInfo = questionsMeta[qCode];
+      const counts = adminData.questionsSummary[qCode] || { 1:0, 2:0, 3:0, 4:0 };
+
+      document.getElementById('questionLegend').innerHTML = `<b>[${qCode}] ${qInfo.section}:</b> ${qInfo.text}`;
+
+      const ctx = document.getElementById('barChart').getContext('2d');
+      const chartData = {
+        labels: ['1 (Lemah)', '2 (Sederhana)', '3 (Baik)', '4 (Sangat Baik)'],
+        datasets: [{
+          label: `Bilangan Pelajar (${qCode})`,
+          data: [counts[1], counts[2], counts[3], counts[4]],
+          backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
+          borderWidth: 1
+        }]
+      };
+
+      if (chartInstance) {
+        chartInstance.data = chartData;
+        chartInstance.update();
+      } else {
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: chartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+          }
+        });
+      }
+    }
+
+    function updateChart() {
+      initOrUpdateChart();
+    }
+
+    function renderIndividualRecord() {
+      const container = document.getElementById('individualRecordCard');
+      const indicator = document.getElementById('recordIndicator');
+      const records = adminData.records;
+
+      if (!records || records.length === 0) {
+        container.innerHTML = `<p class="text-gray-500 italic text-center">Tiada rekod disimpan lagi.</p>`;
+        indicator.innerText = `0 / 0`;
+        return;
+      }
+
+      if (currentRecordIdx < 0) currentRecordIdx = 0;
+      if (currentRecordIdx >= records.length) currentRecordIdx = records.length - 1;
+
+      indicator.innerText = `${currentRecordIdx + 1} / ${records.length}`;
+      const r = records[currentRecordIdx];
+
+      container.innerHTML = `
+        <div class="bg-gray-50 p-4 rounded-lg border space-y-3">
+          <div class="flex flex-col sm:flex-row justify-between items-start gap-2">
+            <div>
+              <p class="font-bold text-base text-blue-900">${r.namaPelajar}</p>
+              <p class="text-xs text-gray-600">No. Pendaftaran: <b>${r.noPendaftaran}</b> | IEEP: <b>${r.namaIEEP}</b> (${r.tarikhIEEP})</p>
+              <p class="text-xs text-gray-400">Tarikh Hantar: ${r.timestamp}</p>
+            </div>
+            <a href="${r.pdfUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow">
+              <i class="fa-solid fa-file-pdf"></i> <span>Muat Turun PDF</span>
+            </a>
+          </div>
+          <hr>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+            ${Object.keys(questionsMeta).map(q => `
+              <div class="bg-white p-2 border rounded shadow-sm">
+                <span class="font-bold text-gray-700">${q}:</span> <span class="text-blue-800 font-bold float-right">${r[q]}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="text-xs space-y-1 bg-white p-3 border rounded">
+            <p><b>Dapatan/Komen Juri (T6):</b> ${r.T6 || '-'}</p>
+            <p><b>Pandangan Keseluruhan (T7):</b> ${r.T7 || '-'}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function prevRecord() {
+      if (currentRecordIdx > 0) {
+        currentRecordIdx--;
+        renderIndividualRecord();
+      }
+    }
+
+    function nextRecord() {
+      if (currentRecordIdx < adminData.records.length - 1) {
+        currentRecordIdx++;
+        renderIndividualRecord();
+      }
+    }
+
+    function renderBulkTable() {
+      const tbody = document.getElementById('bulkTableBody');
+      const records = adminData.records;
+
+      if (!records || records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-gray-400">Tiada rekod data disimpan.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = records.map((r, i) => `
+        <tr class="border-b hover:bg-gray-50">
+          <td class="p-2 border text-center">${i + 1}</td>
+          <td class="p-2 border font-medium">${r.namaPelajar}</td>
+          <td class="p-2 border font-mono">${r.noPendaftaran}</td>
+          <td class="p-2 border">${r.namaIEEP}</td>
+          <td class="p-2 border">${r.tarikhIEEP}</td>
+          <td class="p-2 border text-center">
+            <a href="${r.pdfUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold underline inline-flex items-center space-x-1">
+              <i class="fa-solid fa-download"></i> <span>PDF</span>
+            </a>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function showModal(iconColorClass, iconHtml, title, bodyHtml, footerHtml) {
+      document.getElementById('modalIcon').className = `text-4xl ${iconColorClass}`;
+      document.getElementById('modalIcon').innerHTML = iconHtml;
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalBody').innerHTML = bodyHtml;
+      document.getElementById('modalFooter').innerHTML = footerHtml;
+      document.getElementById('customModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('customModal').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
