@@ -113,7 +113,7 @@
           <p class="text-xs text-gray-500">Analisis peratusan, pengurusan rekod individu & muat turun laporan PDF</p>
         </div>
         <div class="flex items-center space-x-3">
-          <button id="btnDownloadSummary" onclick="downloadSummaryPdf()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1.5 transition">
+          <button id="btnDownloadSummary" onclick="openIeepConfirmModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1.5 transition">
             <i class="fa-solid fa-file-pdf"></i>
             <span>Muat Turun Laporan PDF Keseluruhan</span>
           </button>
@@ -217,6 +217,56 @@
     </div>
   </div>
 
+  <!-- Modal Pop-up Pengesahan/Kemaskini Nama & Tarikh IEEP Laporan Keseluruhan -->
+  <div id="ieepConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center space-x-2 text-blue-900 border-b pb-2">
+        <i class="fa-solid fa-pen-to-square text-xl"></i>
+        <h3 class="font-bold text-base">Sahkan & Kemaskini Maklumat IEEP</h3>
+      </div>
+      <p class="text-xs text-gray-600">Maklumat berikut diambil secara automatik dari Google Spreadsheet (Lajur C & D). Anda boleh mengemaskini maklumat ini sebelum menjana laporan PDF.</p>
+      
+      <form onsubmit="executeDownloadSummaryPdf(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">NAMA IEEP (Lajur C):</label>
+          <input type="text" id="modalNamaIEEP" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 font-semibold" placeholder="Contoh: APEX EXHIBITION 2026">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">TARIKH IEEP (Lajur D):</label>
+          <input type="date" id="modalTarikhIEEP" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 font-semibold">
+        </div>
+        
+        <div class="flex justify-end space-x-2 pt-3 border-t">
+          <button type="button" onclick="closeIeepConfirmModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg text-xs font-bold">Batal</button>
+          <button type="submit" id="btnSubmitIeepModal" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center space-x-1 shadow">
+            <i class="fa-solid fa-gear"></i>
+            <span>Jana & Muat Turun Laporan PDF</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Pop-up Kejayaan (Mengikut Reka Bentuk Gambar) -->
+  <div id="successPdfModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4">
+      <!-- Ikon PDF Hijau -->
+      <div class="text-5xl text-emerald-600 flex justify-center">
+        <i class="fa-solid fa-file-pdf"></i>
+      </div>
+      <h3 class="font-bold text-xl text-gray-800">Laporan PDF Berjaya Dijana!</h3>
+      <p class="text-xs text-gray-600 leading-relaxed">Laporan PDF Rumusan Analisis Keseluruhan Taburan Soalan telah disediakan dan disimpan di Google Drive anda.</p>
+      
+      <div class="pt-2 space-y-2">
+        <a id="successPdfLink" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-xs font-bold inline-flex items-center justify-center space-x-2 shadow-md w-full transition">
+          <i class="fa-solid fa-download"></i>
+          <span>Buka / Muat Turun Laporan PDF</span>
+        </a>
+        <button onclick="closeSuccessPdfModal()" class="text-xs text-gray-500 hover:text-gray-700 underline block mx-auto pt-1 font-semibold">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Pop-up Umum -->
   <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 text-center space-y-4">
@@ -244,7 +294,7 @@
       'D3': { section: 'BAHAGIAN D: KETERKAITAN/CONNECTIVITY', text: 'Pendedahan terhadap teknologi/amalan terkini yang digunakan daripada pihak industri.' }
     };
 
-    let adminData = { records: [], questionsSummary: {}, totalResponses: 0, formOpen: true };
+    let adminData = { records: [], questionsSummary: {}, totalResponses: 0, formOpen: true, namaIEEP: '', tarikhIEEP: '' };
     let currentRecordIdx = 0;
     let chartInstance = null;
     let authenticatedPassword = null;
@@ -579,32 +629,57 @@
       initOrUpdateChart();
     }
 
-    function downloadSummaryPdf() {
+    // -------------------------------------------------------------
+    // MODAL & PROSES PENJANAAN LAPORAN KESELURAHAN (NAMA & TARIKH IEEP)
+    // -------------------------------------------------------------
+    function openIeepConfirmModal() {
       if (!authenticatedPassword) return;
 
-      const btn = document.getElementById('btnDownloadSummary');
+      // Auto-masukkan Nama IEEP dan Tarikh IEEP dari rekod terkini
+      document.getElementById('modalNamaIEEP').value = adminData.namaIEEP || (adminData.records[0] ? adminData.records[0].namaIEEP : '');
+      document.getElementById('modalTarikhIEEP').value = adminData.tarikhIEEP || (adminData.records[0] ? adminData.records[0].tarikhIEEP : '');
+
+      document.getElementById('ieepConfirmModal').classList.remove('hidden');
+    }
+
+    function closeIeepConfirmModal() {
+      document.getElementById('ieepConfirmModal').classList.add('hidden');
+    }
+
+    function executeDownloadSummaryPdf(e) {
+      e.preventDefault();
+      
+      const namaIEEPInput = document.getElementById('modalNamaIEEP').value;
+      const tarikhIEEPInput = document.getElementById('modalTarikhIEEP').value;
+
+      const btn = document.getElementById('btnSubmitIeepModal');
       const originalHtml = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> <span>Menjana Laporan...</span>`;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Menjana Laporan...</span>`;
 
       fetch(SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ action: 'generateSummaryReport', password: authenticatedPassword })
+        body: JSON.stringify({ 
+          action: 'generateSummaryReport', 
+          password: authenticatedPassword,
+          namaIEEP: namaIEEPInput,
+          tarikhIEEP: tarikhIEEPInput
+        })
       })
       .then(res => res.json())
       .then(res => {
         btn.disabled = false;
         btn.innerHTML = originalHtml;
+        closeIeepConfirmModal();
 
         if (res.success) {
-          showModal(
-            'text-emerald-600', 
-            '<i class="fa-solid fa-file-pdf"></i>', 
-            'Laporan PDF Berjaya Dijana!', 
-            'Laporan PDF Rumusan Analisis Keseluruhan Taburan Soalan telah disediakan dan disimpan di Google Drive anda.',
-            `<a href="${res.pdfUrl}" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold inline-block shadow"><i class="fa-solid fa-download me-1"></i> Buka / Muat Turun Laporan PDF</a>
-             <br><button onclick="closeModal()" class="mt-3 text-xs text-gray-500 underline">Tutup</button>`
-          );
+          // Kemaskini data tempatan
+          adminData.namaIEEP = namaIEEPInput;
+          adminData.tarikhIEEP = tarikhIEEPInput;
+
+          // Paparkan Modal Kejayaan mengikut reka bentuk gambar
+          document.getElementById('successPdfLink').href = res.pdfUrl;
+          document.getElementById('successPdfModal').classList.remove('hidden');
         } else {
           alert('Ralat: ' + res.message);
         }
@@ -614,6 +689,10 @@
         btn.innerHTML = originalHtml;
         alert('Ralat semasa menjana laporan: ' + err.message);
       });
+    }
+
+    function closeSuccessPdfModal() {
+      document.getElementById('successPdfModal').classList.add('hidden');
     }
 
     function renderIndividualRecord() {
