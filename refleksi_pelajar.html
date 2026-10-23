@@ -173,9 +173,16 @@
         </div>
       </div>
 
-      <!-- Muat Turun Pukal PDF -->
+      <!-- Muat Turun Pukal PDF & Butang Gabung PDF -->
       <div class="bg-white rounded-xl shadow p-6">
-        <h3 class="font-bold text-gray-700 mb-3"><i class="fa-solid fa-folder-open text-amber-600"></i> Senarai Rekod & Muat Turun PDF Pukal</h3>
+        <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
+          <h3 class="font-bold text-gray-700"><i class="fa-solid fa-folder-open text-amber-600"></i> Senarai Rekod & Muat Turun PDF Pukal</h3>
+          <button id="btnMergePdfs" onclick="downloadMergedIndividualPdfs()" class="bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1.5 transition">
+            <i class="fa-solid fa-file-zipper"></i>
+            <span>Muat Turun Gabungan PDF Individu</span>
+          </button>
+        </div>
+        
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
@@ -247,10 +254,9 @@
     </div>
   </div>
 
-  <!-- Modal Pop-up Kejayaan (Mengikut Reka Bentuk Gambar) -->
+  <!-- Modal Pop-up Kejayaan -->
   <div id="successPdfModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center space-y-4">
-      <!-- Ikon PDF Hijau -->
       <div class="text-5xl text-emerald-600 flex justify-center">
         <i class="fa-solid fa-file-pdf"></i>
       </div>
@@ -635,7 +641,6 @@
     function openIeepConfirmModal() {
       if (!authenticatedPassword) return;
 
-      // Auto-masukkan Nama IEEP dan Tarikh IEEP dari rekod terkini
       document.getElementById('modalNamaIEEP').value = adminData.namaIEEP || (adminData.records[0] ? adminData.records[0].namaIEEP : '');
       document.getElementById('modalTarikhIEEP').value = adminData.tarikhIEEP || (adminData.records[0] ? adminData.records[0].tarikhIEEP : '');
 
@@ -673,11 +678,9 @@
         closeIeepConfirmModal();
 
         if (res.success) {
-          // Kemaskini data tempatan
           adminData.namaIEEP = namaIEEPInput;
           adminData.tarikhIEEP = tarikhIEEPInput;
 
-          // Paparkan Modal Kejayaan mengikut reka bentuk gambar
           document.getElementById('successPdfLink').href = res.pdfUrl;
           document.getElementById('successPdfModal').classList.remove('hidden');
         } else {
@@ -688,6 +691,54 @@
         btn.disabled = false;
         btn.innerHTML = originalHtml;
         alert('Ralat semasa menjana laporan: ' + err.message);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // FUNGSI BAHARU: MUAT TURUN GABUNGAN ALL INDIVIDUAL PDFS
+    // -------------------------------------------------------------
+    function downloadMergedIndividualPdfs() {
+      if (!authenticatedPassword) return;
+
+      if (!adminData.records || adminData.records.length === 0) {
+        alert("Tiada rekod maklum balas individu untuk digabungkan.");
+        return;
+      }
+
+      const btn = document.getElementById('btnMergePdfs');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> <span>Menggabungkan PDF...</span>`;
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ 
+          action: 'mergeAllIndividualPdfs', 
+          password: authenticatedPassword 
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+
+        if (res.success) {
+          showModal(
+            'text-purple-600', 
+            '<i class="fa-solid fa-file-circle-check"></i>', 
+            'PDF Gabungan Berjaya Dijana!', 
+            'Semua fail maklum balas refleksi individu telah berjaya digabungkan menjadi satu fail PDF keseluruhan dan disimpan di Google Drive anda.',
+            `<a href="${res.pdfUrl}" target="_blank" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-xs font-bold inline-block shadow"><i class="fa-solid fa-download me-1"></i> Buka / Muat Turun PDF Gabungan</a>
+             <br><button onclick="closeModal()" class="mt-3 text-xs text-gray-500 underline">Tutup</button>`
+          );
+        } else {
+          alert('Ralat: ' + res.message);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        alert('Ralat semasa menggabungkan PDF: ' + err.message);
       });
     }
 
