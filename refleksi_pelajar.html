@@ -64,12 +64,12 @@
             <input type="text" id="noPendaftaran" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Contoh: 01DIT21F1001">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">3. NAMA IEEP *</label>
-            <input type="text" id="namaIEEP" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500" placeholder="Nama Pertandingan / Program">
+            <label class="block text-xs font-bold text-gray-700 mb-1">3. NAMA IEEP * <span class="text-gray-400 font-normal">(Auto Tetap)</span></label>
+            <input type="text" id="namaIEEP" required readonly class="w-full border rounded-lg p-2 text-sm bg-gray-100 text-gray-700 font-bold cursor-not-allowed" placeholder="Memuatkan nama IEEP...">
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">4. TARIKH IEEP *</label>
-            <input type="date" id="tarikhIEEP" required class="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500">
+            <label class="block text-xs font-bold text-gray-700 mb-1">4. TARIKH IEEP * <span class="text-gray-400 font-normal">(Auto Tetap)</span></label>
+            <input type="date" id="tarikhIEEP" required readonly class="w-full border rounded-lg p-2 text-sm bg-gray-100 text-gray-700 font-bold cursor-not-allowed">
           </div>
         </div>
 
@@ -106,11 +106,11 @@
     <!-- ================= TAB ADMIN DASHBOARD ================= -->
     <div id="sectionAdmin" class="hidden space-y-6">
       
-      <!-- Panel Kawalan Admin -->
+      <!-- Panel Kawalan Admin Utama -->
       <div class="bg-white rounded-xl shadow p-6 flex flex-wrap justify-between items-center gap-4">
         <div>
           <h2 class="text-xl font-bold text-gray-800">Portal Pentadbir (Admin Dashboard)</h2>
-          <p class="text-xs text-gray-500">Analisis peratusan, pengurusan rekod individu & muat turun laporan PDF</p>
+          <p class="text-xs text-gray-500">Analisis peratusan, ketetapan IEEP, pengurusan rekod individu & muat turun laporan PDF</p>
         </div>
         <div class="flex items-center space-x-3">
           <button id="btnDownloadSummary" onclick="openIeepConfirmModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-3.5 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1.5 transition">
@@ -123,6 +123,59 @@
           <button onclick="logoutAdmin()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-xs font-bold shadow">
             <i class="fa-solid fa-right-from-bracket"></i> Keluar
           </button>
+        </div>
+      </div>
+
+      <!-- KAD KETETAPAN PROGRAM IEEP (TAB KETETAPAN SPREADSHEET) -->
+      <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-900">
+        <div class="flex items-center space-x-2 text-blue-900 mb-2">
+          <i class="fa-solid fa-sliders text-lg"></i>
+          <h3 class="font-bold text-base">Ketetapan Program IEEP (Tab KETETAPAN)</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-4">Kemaskini Nama & Tarikh IEEP di bawah untuk menyelaraskan maklumat pada borang pelajar secara automatik. Rekod disimpan pada tab <b>KETETAPAN</b> (Lajur A & B) dalam Google Spreadsheet.</p>
+        
+        <form onsubmit="handleSaveKetetapan(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-bold text-gray-700 mb-1">NAMA IEEP (Lajur A):</label>
+            <input type="text" id="adminNamaIEEP" required class="w-full border rounded-lg p-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500" placeholder="Contoh: PERTANDINGAN INOVASI (IEEP) 2026">
+          </div>
+          <div class="lg:col-span-2">
+            <label class="block text-xs font-bold text-gray-700 mb-1">TARIKH IEEP (Lajur B):</label>
+            <input type="date" id="adminTarikhIEEP" required class="w-full border rounded-lg p-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <button type="submit" id="btnSaveKetetapan" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 px-3 rounded-lg text-xs shadow transition flex items-center justify-center space-x-1.5">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Simpan Ketetapan</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- KAD PENAPIS / CARIAN PANTAS NAMA IEEP (LAJUR C TAB REFLEKSI) -->
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 shadow-sm space-y-3">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center space-x-2 text-blue-900">
+            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+            <div>
+              <h4 class="font-bold text-sm">Penapis / Carian Pantas NAMA IEEP (Lajur C - Tab REFLEKSI)</h4>
+              <p class="text-xs text-blue-700">Taip atau pilih Nama IEEP di bawah untuk mengemaskini Analisis Carta Bar, Purata Skor, dan Laporan PDF secara automatik.</p>
+            </div>
+          </div>
+          <button onclick="clearIeepFilter()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 self-start md:self-auto">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Sifar Penapis (Paparkan Semua)</span>
+          </button>
+        </div>
+
+        <div class="relative max-w-2xl">
+          <input type="text" id="searchNamaIEEP" list="ieepDatalist" oninput="onFilterIeepChange()" placeholder="Ketik atau pilih Nama IEEP daripada Lajur C untuk tapis..." class="w-full border rounded-lg px-3.5 py-2 text-xs font-bold text-blue-900 focus:ring-2 focus:ring-blue-500 bg-white shadow-sm">
+          <datalist id="ieepDatalist"></datalist>
+        </div>
+        
+        <div id="filterStatusBadge" class="text-xs font-bold text-blue-800 flex items-center space-x-1">
+          <i class="fa-solid fa-filter text-blue-600"></i>
+          <span id="filterStatusText">Memaparkan kesemua rekod maklum balas.</span>
         </div>
       </div>
 
@@ -173,30 +226,47 @@
         </div>
       </div>
 
-      <!-- Muat Turun Pukal PDF & Butang Gabung PDF -->
+      <!-- Muat Turun Pukal PDF & Butang Gabung PDF (DENGAN PAGINATION 10 REKOD PER HALAMAN) -->
       <div class="bg-white rounded-xl shadow p-6">
         <div class="flex flex-wrap justify-between items-center mb-4 gap-3 border-b pb-3">
-          <h3 class="font-bold text-gray-700"><i class="fa-solid fa-folder-open text-amber-600"></i> Senarai Rekod & Muat Turun PDF Pukal</h3>
-          <button id="btnMergePdfs" onclick="downloadMergedIndividualPdfs()" class="bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1.5 transition">
-            <i class="fa-solid fa-file-zipper"></i>
-            <span>Muat Turun Gabungan PDF Individu</span>
-          </button>
+          <div>
+            <h3 class="font-bold text-gray-700"><i class="fa-solid fa-folder-open text-amber-600"></i> Senarai Rekod & Muat Turun PDF Pukal</h3>
+            <span id="bulkPaginationInfo" class="text-xs text-gray-500 font-semibold block mt-0.5">Memuatkan rekod...</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Navigasi Halaman Sebelum / Selepas -->
+            <div class="flex items-center space-x-1 border rounded-lg p-1 bg-gray-50 shadow-sm">
+              <button onclick="prevBulkPage()" id="btnPrevBulk" class="bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-800 px-2.5 py-1 rounded text-xs font-bold transition">
+                <i class="fa-solid fa-chevron-left"></i> Sebelum
+              </button>
+              <span id="bulkPageIndicator" class="text-xs font-bold px-2 text-blue-900 min-w-[50px] text-center">1 / 1</span>
+              <button onclick="nextBulkPage()" id="btnNextBulk" class="bg-gray-200 hover:bg-gray-300 disabled:opacity-50 text-gray-800 px-2.5 py-1 rounded text-xs font-bold transition">
+                Selepas <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <button id="btnMergePdfs" onclick="downloadMergedIndividualPdfs()" class="bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-2 rounded-lg font-bold text-xs shadow flex items-center space-x-1.5 transition">
+              <i class="fa-solid fa-file-zipper"></i>
+              <span>Muat Turun Gabungan PDF Individu</span>
+            </button>
+          </div>
         </div>
         
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
               <tr class="bg-gray-100 border-b">
-                <th class="p-2 border">Bil</th>
+                <th class="p-2 border text-center">Bil</th>
                 <th class="p-2 border">Nama Pelajar</th>
                 <th class="p-2 border">No. Pendaftaran</th>
                 <th class="p-2 border">Nama IEEP</th>
                 <th class="p-2 border">Tarikh</th>
-                <th class="p-2 border text-center">Tindakan PDF</th>
+                <th class="p-2 border text-center">Tindakan</th>
               </tr>
             </thead>
             <tbody id="bulkTableBody">
-              <!-- Senarai Pukal -->
+              <!-- Senarai Pukal (10 Rekod Per Halaman) -->
             </tbody>
           </table>
         </div>
@@ -229,9 +299,9 @@
     <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
       <div class="flex items-center space-x-2 text-blue-900 border-b pb-2">
         <i class="fa-solid fa-pen-to-square text-xl"></i>
-        <h3 class="font-bold text-base">Sahkan & Kemaskini Maklumat IEEP</h3>
+        <h3 class="font-bold text-base">Sahkan Maklumat IEEP Laporan Keseluruhan</h3>
       </div>
-      <p class="text-xs text-gray-600">Maklumat berikut diambil secara automatik dari Google Spreadsheet (Lajur C & D). Anda boleh mengemaskini maklumat ini sebelum menjana laporan PDF.</p>
+      <p class="text-xs text-gray-600">Maklumat berikut diambil berdasarkan carian pantas <b>NAMA IEEP (Lajur C)</b> yang sedang dipilih. Anda boleh menyemak atau mengemas kini maklumat sebelum menjana laporan PDF.</p>
       
       <form onsubmit="executeDownloadSummaryPdf(event)" class="space-y-3">
         <div>
@@ -239,7 +309,7 @@
           <input type="text" id="modalNamaIEEP" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 font-semibold" placeholder="Contoh: APEX EXHIBITION 2026">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">TARIKH IEEP (Lajur D):</label>
+          <label class="block text-xs font-bold text-gray-700 mb-1">TARIKH IEEP:</label>
           <input type="date" id="modalTarikhIEEP" required class="w-full border rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 font-semibold">
         </div>
         
@@ -300,11 +370,19 @@
       'D3': { section: 'BAHAGIAN D: KETERKAITAN/CONNECTIVITY', text: 'Pendedahan terhadap teknologi/amalan terkini yang digunakan daripada pihak industri.' }
     };
 
-    let adminData = { records: [], questionsSummary: {}, totalResponses: 0, formOpen: true, namaIEEP: '', tarikhIEEP: '' };
+    let adminData = { records: [], questionsSummary: {}, totalResponses: 0, formOpen: true, namaIEEP: '', tarikhIEEP: '', uniqueIeepList: [] };
+    let activeRecords = [];
+    let activeQuestionsSummary = {};
+    let activeTotalResponses = 0;
+
     let currentRecordIdx = 0;
     let chartInstance = null;
     let authenticatedPassword = null;
     let chartDisplayMode = 'count';
+
+    // Pembolehubah Pagination Jadual Pukal
+    let bulkCurrentPage = 1;
+    const bulkPerPage = 10;
 
     window.addEventListener('DOMContentLoaded', () => {
       buildFormQuestions();
@@ -318,8 +396,14 @@
           if (!data.formOpen) {
             disableFormAndShowBanner();
           }
+          if (data.namaIEEP) {
+            document.getElementById('namaIEEP').value = data.namaIEEP;
+          }
+          if (data.tarikhIEEP) {
+            document.getElementById('tarikhIEEP').value = data.tarikhIEEP;
+          }
         })
-        .catch(err => console.error("Ralat semakan status:", err));
+        .catch(err => console.error("Ralat semakan status & ketetapan:", err));
     }
 
     function disableFormAndShowBanner() {
@@ -375,6 +459,7 @@
         document.getElementById('sectionAdmin').classList.add('hidden');
         document.getElementById('tabPelajarBtn').className = 'bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition';
         document.getElementById('tabAdminBtn').className = 'bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition';
+        checkInitialFormStatus();
       } else {
         if (authenticatedPassword) {
           openAdminSection();
@@ -469,7 +554,7 @@
           showModal('text-green-500', '<i class="fa-solid fa-circle-check"></i>', 'Penyerahan Berjaya!', 
             'Data refleksi anda telah berjaya disimpan ke tab <b>REFLEKSI</b>. Anda boleh memuat turun dokumen PDF refleksi di bawah.',
             `<a href="${res.pdfUrl}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold inline-block shadow"><i class="fa-solid fa-file-pdf"></i> Muat Turun Dokumen PDF</a>
-             <br><button onclick="closeModal(); document.getElementById('refleksiForm').reset();" class="mt-3 text-xs text-gray-500 underline">Tutup</button>`
+             <br><button onclick="closeModal(); document.getElementById('refleksiForm').reset(); checkInitialFormStatus();" class="mt-3 text-xs text-gray-500 underline">Tutup</button>`
           );
         } else {
           alert('Ralat: ' + res.message);
@@ -495,12 +580,123 @@
           }
           adminData = data;
           updateStatusBtn(data.formOpen);
+
+          if (data.namaIEEP) document.getElementById('adminNamaIEEP').value = data.namaIEEP;
+          if (data.tarikhIEEP) document.getElementById('adminTarikhIEEP').value = data.tarikhIEEP;
+
+          populateIeepDatalist();
           populateFilterOptions();
-          initOrUpdateChart();
-          renderIndividualRecord();
-          renderBulkTable();
+          applyIeepFilter();
         })
         .catch(err => alert("Ralat mengambil data admin: " + err.message));
+    }
+
+    function populateIeepDatalist() {
+      const datalist = document.getElementById('ieepDatalist');
+      const list = adminData.uniqueIeepList || [];
+      datalist.innerHTML = list.map(item => `<option value="${item}">`).join('');
+    }
+
+    function onFilterIeepChange() {
+      currentRecordIdx = 0;
+      applyIeepFilter();
+    }
+
+    function clearIeepFilter() {
+      document.getElementById('searchNamaIEEP').value = '';
+      currentRecordIdx = 0;
+      applyIeepFilter();
+    }
+
+    // PENAPISAN PADANAN TEPAT (EXACT MATCH FIRST)
+    function applyIeepFilter() {
+      const query = document.getElementById('searchNamaIEEP').value.trim();
+      const statusBadge = document.getElementById('filterStatusText');
+      bulkCurrentPage = 1;
+
+      if (!query) {
+        activeRecords = adminData.records || [];
+        statusBadge.innerHTML = `Memaparkan kesemua <b>${activeRecords.length}</b> rekod maklum balas.`;
+      } else {
+        const queryLower = query.toLowerCase();
+        const exactMatchExists = (adminData.uniqueIeepList || []).some(item => item.toLowerCase() === queryLower);
+
+        if (exactMatchExists) {
+          activeRecords = (adminData.records || []).filter(r => r.namaIEEP.toLowerCase() === queryLower);
+        } else {
+          activeRecords = (adminData.records || []).filter(r => r.namaIEEP.toLowerCase().includes(queryLower));
+        }
+        statusBadge.innerHTML = `Berjaya menapis <b>${activeRecords.length}</b> daripada <b>${adminData.records.length}</b> rekod untuk NAMA IEEP disemak.`;
+      }
+
+      const qKeys = ['A1','A2','A3','B1','B2','B3','C1','C2','C3','D1','D2','D3'];
+      activeQuestionsSummary = {};
+      activeTotalResponses = activeRecords.length;
+
+      qKeys.forEach(q => {
+        activeQuestionsSummary[q] = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        activeRecords.forEach(r => {
+          const val = parseInt(r[q]);
+          if (val >= 1 && val <= 4) {
+            activeQuestionsSummary[q][val]++;
+          }
+        });
+      });
+
+      initOrUpdateChart();
+      renderIndividualRecord();
+      renderBulkTable();
+    }
+
+    function handleSaveKetetapan(e) {
+      e.preventDefault();
+      if (!authenticatedPassword) return;
+
+      const namaInput = document.getElementById('adminNamaIEEP').value;
+      const tarikhInput = document.getElementById('adminTarikhIEEP').value;
+      const btn = document.getElementById('btnSaveKetetapan');
+
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Menyimpan...`;
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'saveKetetapan',
+          password: authenticatedPassword,
+          namaIEEP: namaInput,
+          tarikhIEEP: tarikhInput
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+
+        if (res.success) {
+          adminData.namaIEEP = namaInput;
+          adminData.tarikhIEEP = tarikhInput;
+
+          document.getElementById('namaIEEP').value = namaInput;
+          document.getElementById('tarikhIEEP').value = tarikhInput;
+
+          showModal(
+            'text-blue-600',
+            '<i class="fa-solid fa-circle-check"></i>',
+            'Ketetapan Disimpan!',
+            'Nama IEEP dan Tarikh IEEP telah berjaya dikemas kini pada tab <b>KETETAPAN</b> dalam Google Spreadsheet.',
+            `<button onclick="closeModal()" class="bg-blue-900 text-white px-4 py-1.5 rounded-lg text-xs font-bold">OK</button>`
+          );
+        } else {
+          alert('Ralat: ' + res.message);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        alert('Ralat menyimpan ketetapan: ' + err.message);
+      });
     }
 
     function updateStatusBtn(isOpen) {
@@ -555,8 +751,8 @@
     function initOrUpdateChart() {
       const qCode = document.getElementById('questionFilter').value || 'A1';
       const qInfo = questionsMeta[qCode];
-      const counts = adminData.questionsSummary[qCode] || { 1: 0, 2: 0, 3: 0, 4: 0 };
-      const total = adminData.totalResponses || 0;
+      const counts = activeQuestionsSummary[qCode] || { 1: 0, 2: 0, 3: 0, 4: 0 };
+      const total = activeTotalResponses || 0;
 
       const p1 = total ? ((counts[1] / total) * 100).toFixed(1) : 0;
       const p2 = total ? ((counts[2] / total) * 100).toFixed(1) : 0;
@@ -635,14 +831,15 @@
       initOrUpdateChart();
     }
 
-    // -------------------------------------------------------------
-    // MODAL & PROSES PENJANAAN LAPORAN KESELURAHAN (NAMA & TARIKH IEEP)
-    // -------------------------------------------------------------
     function openIeepConfirmModal() {
       if (!authenticatedPassword) return;
 
-      document.getElementById('modalNamaIEEP').value = adminData.namaIEEP || (adminData.records[0] ? adminData.records[0].namaIEEP : '');
-      document.getElementById('modalTarikhIEEP').value = adminData.tarikhIEEP || (adminData.records[0] ? adminData.records[0].tarikhIEEP : '');
+      const activeSearchValue = document.getElementById('searchNamaIEEP').value.trim();
+      const defaultNama = activeSearchValue || adminData.namaIEEP || (activeRecords[0] ? activeRecords[0].namaIEEP : '');
+      const defaultTarikh = activeRecords[0] ? activeRecords[0].tarikhIEEP : (adminData.tarikhIEEP || '');
+
+      document.getElementById('modalNamaIEEP').value = defaultNama;
+      document.getElementById('modalTarikhIEEP').value = defaultTarikh;
 
       document.getElementById('ieepConfirmModal').classList.remove('hidden');
     }
@@ -678,9 +875,6 @@
         closeIeepConfirmModal();
 
         if (res.success) {
-          adminData.namaIEEP = namaIEEPInput;
-          adminData.tarikhIEEP = tarikhIEEPInput;
-
           document.getElementById('successPdfLink').href = res.pdfUrl;
           document.getElementById('successPdfModal').classList.remove('hidden');
         } else {
@@ -694,17 +888,15 @@
       });
     }
 
-    // -------------------------------------------------------------
-    // FUNGSI BAHARU: MUAT TURUN GABUNGAN ALL INDIVIDUAL PDFS
-    // -------------------------------------------------------------
     function downloadMergedIndividualPdfs() {
       if (!authenticatedPassword) return;
 
-      if (!adminData.records || adminData.records.length === 0) {
+      if (!activeRecords || activeRecords.length === 0) {
         alert("Tiada rekod maklum balas individu untuk digabungkan.");
         return;
       }
 
+      const activeSearchValue = document.getElementById('searchNamaIEEP').value.trim();
       const btn = document.getElementById('btnMergePdfs');
       const originalHtml = btn.innerHTML;
       btn.disabled = true;
@@ -714,7 +906,8 @@
         method: 'POST',
         body: JSON.stringify({ 
           action: 'mergeAllIndividualPdfs', 
-          password: authenticatedPassword 
+          password: authenticatedPassword,
+          namaIEEP: activeSearchValue
         })
       })
       .then(res => res.json())
@@ -727,7 +920,7 @@
             'text-purple-600', 
             '<i class="fa-solid fa-file-circle-check"></i>', 
             'PDF Gabungan Berjaya Dijana!', 
-            'Semua fail maklum balas refleksi individu telah berjaya digabungkan menjadi satu fail PDF keseluruhan dan disimpan di Google Drive anda.',
+            'Fail maklum balas refleksi individu yang ditapis telah berjaya digabungkan menjadi satu fail PDF keseluruhan dan disimpan di Google Drive anda.',
             `<a href="${res.pdfUrl}" target="_blank" class="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2 rounded-lg text-xs font-bold inline-block shadow"><i class="fa-solid fa-download me-1"></i> Buka / Muat Turun PDF Gabungan</a>
              <br><button onclick="closeModal()" class="mt-3 text-xs text-gray-500 underline">Tutup</button>`
           );
@@ -746,13 +939,83 @@
       document.getElementById('successPdfModal').classList.add('hidden');
     }
 
+    // -------------------------------------------------------------
+    // FUNGSI PENGESAHAN & PEMADAMAN REKOD INDIVIDU & PDF DRIVE
+    // -------------------------------------------------------------
+    function confirmDeleteRecord(noPendaftaran, namaPelajar) {
+      if (!authenticatedPassword) return;
+
+      showModal(
+        'text-red-600',
+        '<i class="fa-solid fa-triangle-exclamation"></i>',
+        'Pengesahan Padam RekOD',
+        `Adakah anda pasti mahu memadam rekod refleksi bagi <b>${namaPelajar} (${noPendaftaran})</b>?<br><br><span class="text-xs text-red-600 font-bold">Tindakan ini akan memadam baris rekod dalam tab REFLEKSI dan membuang fail PDF berkenaan ke Tong Sampah Google Drive!</span>`,
+        `<div class="flex justify-center space-x-2 pt-2">
+           <button onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1.5 rounded-lg text-xs font-bold">Batal</button>
+           <button onclick="executeDeleteRecord('${noPendaftaran}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1 shadow">
+             <i class="fa-solid fa-trash-can"></i> <span>Ya, Padam Rekod</span>
+           </button>
+         </div>`
+      );
+    }
+
+    function executeDeleteRecord(noPendaftaran) {
+      if (!authenticatedPassword) return;
+
+      showModal(
+        'text-gray-600',
+        '<i class="fa-solid fa-spinner fa-spin"></i>',
+        'Memadam Rekod...',
+        'Sistem sedang memadam rekod dan fail PDF berkaitan daripada Google Drive. Sila tunggu...',
+        ''
+      );
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'deleteRefleksiRecord',
+          password: authenticatedPassword,
+          noPendaftaran: noPendaftaran
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          showModal(
+            'text-green-600',
+            '<i class="fa-solid fa-circle-check"></i>',
+            'Rekod Berjaya Dipadam!',
+            res.message,
+            `<button onclick="closeModal(); fetchAdminData();" class="bg-blue-900 text-white px-4 py-1.5 rounded-lg text-xs font-bold">OK</button>`
+          );
+        } else {
+          showModal(
+            'text-red-600',
+            '<i class="fa-solid fa-circle-xmark"></i>',
+            'Ralat Memadam Rekod',
+            res.message,
+            `<button onclick="closeModal()" class="bg-gray-800 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Tutup</button>`
+          );
+        }
+      })
+      .catch(err => {
+        showModal(
+          'text-red-600',
+          '<i class="fa-solid fa-circle-xmark"></i>',
+          'Ralat Ketersambungan',
+          'Ralat sistem: ' + err.message,
+          `<button onclick="closeModal()" class="bg-gray-800 text-white px-4 py-1.5 rounded-lg text-xs font-bold">Tutup</button>`
+        );
+      });
+    }
+
     function renderIndividualRecord() {
       const container = document.getElementById('individualRecordCard');
       const indicator = document.getElementById('recordIndicator');
-      const records = adminData.records;
+      const records = activeRecords;
 
       if (!records || records.length === 0) {
-        container.innerHTML = `<p class="text-gray-500 italic text-center">Tiada rekod disimpan lagi.</p>`;
+        container.innerHTML = `<p class="text-gray-500 italic text-center">Tiada rekod ditemui mengikut carian ini.</p>`;
         indicator.innerText = `0 / 0`;
         return;
       }
@@ -762,6 +1025,7 @@
 
       indicator.innerText = `${currentRecordIdx + 1} / ${records.length}`;
       const r = records[currentRecordIdx];
+      const safeNama = (r.namaPelajar || '').replace(/'/g, "\\'");
 
       container.innerHTML = `
         <div class="bg-gray-50 p-4 rounded-lg border space-y-3">
@@ -771,9 +1035,14 @@
               <p class="text-xs text-gray-600">No. Pendaftaran: <b>${r.noPendaftaran}</b> | IEEP: <b>${r.namaIEEP}</b> (${r.tarikhIEEP})</p>
               <p class="text-xs text-gray-400">Tarikh Hantar: ${r.timestamp}</p>
             </div>
-            <a href="${r.pdfUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow">
-              <i class="fa-solid fa-file-pdf"></i> <span>Muat Turun PDF</span>
-            </a>
+            <div class="flex flex-wrap gap-2">
+              <a href="${r.pdfUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow">
+                <i class="fa-solid fa-file-pdf"></i> <span>Muat Turun PDF</span>
+              </a>
+              <button onclick="confirmDeleteRecord('${r.noPendaftaran}', '${safeNama}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center space-x-1 shadow">
+                <i class="fa-solid fa-trash-can"></i> <span>Padam Rekod</span>
+              </button>
+            </div>
           </div>
           <hr>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
@@ -799,35 +1068,76 @@
     }
 
     function nextRecord() {
-      if (currentRecordIdx < adminData.records.length - 1) {
+      if (currentRecordIdx < activeRecords.length - 1) {
         currentRecordIdx++;
         renderIndividualRecord();
       }
     }
 
+    // FUNGSI PAPARAN JADUAL PUKAL DENGAN PAGINATION (10 REKOD PER HALAMAN)
     function renderBulkTable() {
       const tbody = document.getElementById('bulkTableBody');
-      const records = adminData.records;
+      const records = activeRecords;
+      const totalRecords = records.length;
 
-      if (!records || records.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-gray-400">Tiada rekod data disimpan.</td></tr>`;
+      if (!records || totalRecords === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-3 text-center text-gray-400">Tiada rekod data ditemui mengikut carian.</td></tr>`;
+        document.getElementById('bulkPageIndicator').innerText = `0 / 0`;
+        document.getElementById('bulkPaginationInfo').innerText = `Menunjukkan 0 rekod`;
+        document.getElementById('btnPrevBulk').disabled = true;
+        document.getElementById('btnNextBulk').disabled = true;
         return;
       }
 
-      tbody.innerHTML = records.map((r, i) => `
+      const totalPages = Math.ceil(totalRecords / bulkPerPage);
+      if (bulkCurrentPage < 1) bulkCurrentPage = 1;
+      if (bulkCurrentPage > totalPages) bulkCurrentPage = totalPages;
+
+      const startIndex = (bulkCurrentPage - 1) * bulkPerPage;
+      const endIndex = Math.min(startIndex + bulkPerPage, totalRecords);
+      const pageRecords = records.slice(startIndex, endIndex);
+
+      document.getElementById('bulkPageIndicator').innerText = `${bulkCurrentPage} / ${totalPages}`;
+      document.getElementById('bulkPaginationInfo').innerText = `Menunjukkan ${startIndex + 1} hingga ${endIndex} daripada ${totalRecords} rekod`;
+
+      document.getElementById('btnPrevBulk').disabled = (bulkCurrentPage === 1);
+      document.getElementById('btnNextBulk').disabled = (bulkCurrentPage === totalPages);
+
+      tbody.innerHTML = pageRecords.map((r, i) => {
+        const globalIndex = startIndex + i + 1;
+        const safeNama = (r.namaPelajar || '').replace(/'/g, "\\'");
+        return `
         <tr class="border-b hover:bg-gray-50">
-          <td class="p-2 border text-center">${i + 1}</td>
+          <td class="p-2 border text-center font-bold text-gray-600">${globalIndex}</td>
           <td class="p-2 border font-medium">${r.namaPelajar}</td>
           <td class="p-2 border font-mono">${r.noPendaftaran}</td>
           <td class="p-2 border">${r.namaIEEP}</td>
           <td class="p-2 border">${r.tarikhIEEP}</td>
-          <td class="p-2 border text-center">
+          <td class="p-2 border text-center space-x-2">
             <a href="${r.pdfUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold underline inline-flex items-center space-x-1">
               <i class="fa-solid fa-download"></i> <span>PDF</span>
             </a>
+            <button onclick="confirmDeleteRecord('${r.noPendaftaran}', '${safeNama}')" class="text-red-600 hover:text-red-800 font-bold underline inline-flex items-center space-x-1">
+              <i class="fa-solid fa-trash-can"></i> <span>Padam</span>
+            </button>
           </td>
         </tr>
-      `).join('');
+      `}).join('');
+    }
+
+    function prevBulkPage() {
+      if (bulkCurrentPage > 1) {
+        bulkCurrentPage--;
+        renderBulkTable();
+      }
+    }
+
+    function nextBulkPage() {
+      const totalPages = Math.ceil(activeRecords.length / bulkPerPage);
+      if (bulkCurrentPage < totalPages) {
+        bulkCurrentPage++;
+        renderBulkTable();
+      }
     }
 
     function showModal(iconColorClass, iconHtml, title, bodyHtml, footerHtml) {
